@@ -45,7 +45,7 @@ jobs:
       with:
         platforms: all
 
-    - uses: pypa/cibuildwheel@v2.2.2
+    - uses: pypa/cibuildwheel@v2.3.0
       env:
         CIBW_ARCHS_MACOS: auto universal2 aarch64 armv7l
 
