@@ -1,11 +1,19 @@
-import timeit
-from collections import ChainMap as PChainMap
+# Copyright 2021 Gina Häußge & Octoprint contributors
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>
+from collections import ChainMap as PyChainMap
 
-from op_hierarchical_chainmap import ChainMap as CChainmap
-from op_hierarchical_chainmap import \
-    HierarchicalChainMap as CHierarchicalChainMap
-
-default_settings = {
+example_object = {
     "serial": {
         "port": None,
         "baudrate": None,
@@ -386,7 +394,8 @@ default_settings = {
     },
 }
 
-class PHierarchicalChainMap(PChainMap):
+
+class PyHierarchicalChainMap(PyChainMap):
     def deep_dict(self, root=None):
         if root is None:
             root = self
@@ -472,7 +481,7 @@ class PHierarchicalChainMap(PChainMap):
                 wrapped_mappings.append(mapping[key])
             else:
                 wrapped_mappings.append({})
-        return PHierarchicalChainMap(*wrapped_mappings)
+        return PyHierarchicalChainMap(*wrapped_mappings)
 
     @classmethod
     def _get_next(cls, key, node, only_local=False):
@@ -482,11 +491,3 @@ class PHierarchicalChainMap(PChainMap):
             raise KeyError(key)
         else:
             return cls._hierarchy_for_key(key, node)
-
-
-def foo(HierarchicalChainMap):
-    cm = HierarchicalChainMap({}, default_settings)
-    return lambda: cm.deep_dict(None)
-
-print(timeit.timeit(foo(CHierarchicalChainMap), number=1000000))
-print(timeit.timeit(foo(PHierarchicalChainMap), number=10000)*100)
