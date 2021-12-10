@@ -19,3 +19,12 @@ $ python ./tests/test.py  # run HierarchicalChainMap.deep_dict() performance tes
 ## Development
 
 Clion was used in the development of this program. You can open this as a Clion project using the `CMakeLists.txt` file.
+
+
+## License
+
+The C++ extension is licensed under the Apache 2.0 license.
+
+Certain unit tests as well as part of HierarchicalChainMap are licensed
+under the AGPLv3. If you wish to use the Apache-2.0 parts of this project
+under that license, you may not include the AGPLv3 parts in your usage.
