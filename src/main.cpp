@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 
+#include <cstdint>
 #include <algorithm>
 #include <sstream>
 
@@ -93,7 +94,7 @@ struct CppChainMap {
     /** flattens the chainmap into a single map */
     py::dict flattened() const {
         py::dict d{};
-        for (ssize_t i = this->maps.size() - 1; i >= 0; --i) {
+        for (size_t i = this->maps.size() - 1; i != SIZE_MAX; --i) {
             const py::dict &mapping = this->maps[i];
             d.attr("update")(mapping);
         }
