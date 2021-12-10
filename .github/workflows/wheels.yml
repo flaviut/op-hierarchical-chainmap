@@ -47,7 +47,8 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.3.0
       env:
-        CIBW_ARCHS_MACOS: auto universal2 aarch64
+        CIBW_ARCHS_MACOS: auto universal2
+        CIBW_ARCHS_LINUX: auto universal2 aarch64
 
     - name: Verify clean directory
       run: git diff --exit-code
