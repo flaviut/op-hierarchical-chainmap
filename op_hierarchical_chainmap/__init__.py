@@ -31,6 +31,57 @@ class HierarchicalChainMap:
     def deep_dict(self):
         return self.base.deep_dict()
 
+    def __copy__(self):
+        return self.base.__copy__()
+
+    def copy(self):
+        return self.base.copy()
+
+    def new_child(self):
+        return self.base.new_child()
+
+    def __getstate__(self):
+        return self.base.__getstate__()
+
+    def __setstate__(self, state):
+        return self.base.__setstate__(state)
+
+    def __getitem__(self, arg0):
+        return self.base.__getitem__(arg0)
+
+    def __setitem__(self, arg0, arg1):
+        return self.base.__setitem__(arg0, arg1)
+
+    def __delitem__(self, arg0):
+        return self.base.__delitem__(arg0)
+
+    def __contains__(self, arg0):
+        return self.base.__contains__(arg0)
+
+    def __len__(self):
+        return self.base.__len__()
+
+    def __iter__(self):
+        return self.base.__iter__()
+
+    def items(self):
+        return self.base.items()
+
+    def keys(self):
+        return self.base.keys()
+
+    def values(self):
+        return self.base.values()
+
+    def __eq__(self, arg0):
+        return self.base.__eq__(arg0)
+
+    def flatten(self):
+        return self.base.flatten()
+
+    def get(self, arg0, default=None):
+        return self.base.get(arg0, default)
+
     def has_path(self, path, only_local=False, only_defaults=False):
         if only_defaults:
             current = self.parents
