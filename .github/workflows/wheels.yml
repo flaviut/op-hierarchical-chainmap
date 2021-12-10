@@ -39,9 +39,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up QEMU
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v1
+      with:
+        platforms: all
+
     - uses: pypa/cibuildwheel@v2.2.2
       env:
-        CIBW_ARCHS_MACOS: auto universal2
+        CIBW_ARCHS_MACOS: auto universal2 aarch64 armv7l
 
     - name: Verify clean directory
       run: git diff --exit-code
