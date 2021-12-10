@@ -3,10 +3,13 @@ import sys
 from pybind11 import get_cmake_dir
 
 # Available at setup time due to pyproject.toml
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from pybind11.setup_helpers import Pybind11Extension, build_ext, ParallelCompile
 from setuptools import setup
 
 __version__ = "0.0.1"
+
+# Optional multithreaded build
+ParallelCompile("NPY_NUM_BUILD_JOBS").install()
 
 # The main interface is through Pybind11Extension.
 # * You can add cxx_std=11/14/17, and then build_ext can be removed.
@@ -19,15 +22,14 @@ __version__ = "0.0.1"
 
 ext_modules = [
     Pybind11Extension(
-        "python_example",
+        "op_hierarchical_chainmap",
         ["src/main.cpp"],
-        # Example: passing in the version to the compiled code
-        define_macros=[("VERSION_INFO", __version__)],
+        extra_compile_args=["-g"],
     ),
 ]
 
 setup(
-    name="python_example",
+    name="op_hierarchical_chainmap",
     version=__version__,
     author="Sylvain Corlay",
     author_email="sylvain.corlay@gmail.com",

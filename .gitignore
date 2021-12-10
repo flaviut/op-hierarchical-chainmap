@@ -1,3 +1,6 @@
+*.data*
+*.coz
+*.svg
 
 # Created by https://www.toptal.com/developers/gitignore/api/c,vim,c++,linux,macos,python,windows,intellij+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,vim,c++,linux,macos,python,windows,intellij+all
