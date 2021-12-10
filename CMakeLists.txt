@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(op_hierarchical_chainmap)
+project(op_hierarchical_chainmap_cppext)
 
 include(cmake/CPM.cmake)
 
@@ -14,6 +14,6 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
-pybind11_add_module(op_hierarchical_chainmap
+pybind11_add_module(op_hierarchical_chainmap_cppext
         src/main.cpp
         )

@@ -2,7 +2,7 @@ import copy
 import pickle
 import unittest
 
-from op_hierarchical_chainmap import ChainMap
+from op_hierarchical_chainmap._ext import ChainMap
 
 
 class TestChainMap(unittest.TestCase):

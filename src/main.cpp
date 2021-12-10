@@ -164,7 +164,7 @@ static py::handle getNext(const py::str &key, const py::handle &node, bool onlyL
     }
 }
 
-PYBIND11_MODULE(op_hierarchical_chainmap, m) {
+PYBIND11_MODULE(_ext, m) {
     py::class_<CppChainMap>(m, "ChainMap")
             .def(py::init<>())
             .def(py::init<const py::args &>())
@@ -198,7 +198,7 @@ PYBIND11_MODULE(op_hierarchical_chainmap, m) {
             .def("get", &CppChainMap::get, py::arg("key"), py::arg("default") = py::none())
             .def_property_readonly("parents", &CppChainMap::parents)
             .def_property_readonly("maps", &CppChainMap::attrMaps);
-    py::class_<CppHierarchicalChainMap, CppChainMap>(m, "HierarchicalChainMap")
+    py::class_<CppHierarchicalChainMap, CppChainMap>(m, "HierarchicalChainMapBase")
             .def(py::init<>())
             .def(py::init<const py::args &>())
             .def("deep_dict", &CppHierarchicalChainMap::deepDict, py::arg("root") = py::none());

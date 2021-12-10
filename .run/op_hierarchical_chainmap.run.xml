@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="op_hierarchical_chainmap" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="tests/test.py" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="op_hierarchical_chainmap" TARGET_NAME="op_hierarchical_chainmap" CONFIG_NAME="Debug" RUN_PATH="/usr/bin/python3">
+  <configuration default="false" name="op_hierarchical_chainmap" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="tests/test.py" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="op_hierarchical_chainmap_cppext" TARGET_NAME="op_hierarchical_chainmap_cppext" CONFIG_NAME="Debug" RUN_PATH="/usr/bin/python3">
     <envs>
       <env name="PYTHONPATH" value="$PROJECT_DIR$/cmake-build-relwithdebinfo" />
     </envs>
