@@ -1,6 +1,3 @@
-import sys
-
-from pybind11 import get_cmake_dir
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import (ParallelCompile, Pybind11Extension,
                                     build_ext)
@@ -31,10 +28,10 @@ ext_modules = [
 setup(
     name="op_hierarchical_chainmap",
     version=__version__,
-    author="Sylvain Corlay",
-    author_email="sylvain.corlay@gmail.com",
-    url="https://github.com/pybind/python_example",
-    description="A test project using pybind11",
+    author="Flaviu Tamas",
+    author_email="me@flaviutamas.com",
+    url="https://github.com/flaviut/op-hierarchical-chainmap",
+    description="A faster, native, replacement for Octoprint's HierarchicalChainMap",
     long_description="",
     ext_modules=ext_modules,
     extras_require={"test": "pytest"},
