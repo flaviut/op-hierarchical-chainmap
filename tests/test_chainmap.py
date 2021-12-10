@@ -1,9 +1,10 @@
-from collections import OrderedDict, UserDict
-
 import copy
 import pickle
 import unittest
+from collections import OrderedDict, UserDict
+
 from op_hierarchical_chainmap import ChainMap
+
 
 class TestChainMap(unittest.TestCase):
 

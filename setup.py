@@ -1,9 +1,9 @@
 import sys
 
 from pybind11 import get_cmake_dir
-
 # Available at setup time due to pyproject.toml
-from pybind11.setup_helpers import Pybind11Extension, build_ext, ParallelCompile
+from pybind11.setup_helpers import (ParallelCompile, Pybind11Extension,
+                                    build_ext)
 from setuptools import setup
 
 __version__ = "0.0.1"
