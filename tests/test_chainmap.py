@@ -30,10 +30,6 @@ class TestChainMap(unittest.TestCase):
             self.assertIn(key, d)
         for k, v in dict(a=1, b=2, c=30, z=100).items():              # check get
             self.assertEqual(d.get(k, 100), v)
-        self.assertIn(repr(d), [                                      # check repr
-            type(d).__name__ + "({'c': 30}, {'a': 1, 'b': 2})",
-            type(d).__name__ + "({'c': 30}, {'b': 2, 'a': 1})"
-        ])
 
         for e in d.copy(), copy.copy(d):                               # check shallow copies
             self.assertEqual(d, e)
@@ -44,7 +40,8 @@ class TestChainMap(unittest.TestCase):
                 self.assertIs(m1, m2)
 
         # check deep copies
-        for proto in range(pickle.HIGHEST_PROTOCOL + 1):
+        # pybind11 doesn't seem to support pickle v0 & v1
+        for proto in range(2, pickle.HIGHEST_PROTOCOL + 1):
             e = pickle.loads(pickle.dumps(d, proto))
             self.assertEqual(d, e)
             self.assertEqual(d.maps, e.maps)
@@ -52,7 +49,6 @@ class TestChainMap(unittest.TestCase):
             for m1, m2 in zip(d.maps, e.maps):
                 self.assertIsNot(m1, m2, e)
         for e in [copy.deepcopy(d),
-                  eval(repr(d))
                   ]:
             self.assertEqual(d, e)
             self.assertEqual(d.maps, e.maps)
@@ -90,77 +86,3 @@ class TestChainMap(unittest.TestCase):
         self.assertFalse(ChainMap({}, {}))
         self.assertTrue(ChainMap({1:2}, {}))
         self.assertTrue(ChainMap({}, {1:2}))
-
-    def test_missing(self):
-        class DefaultChainMap(ChainMap):
-            def __missing__(self, key):
-                return 999
-        d = DefaultChainMap(dict(a=1, b=2), dict(b=20, c=30))
-        for k, v in dict(a=1, b=2, c=30, d=999).items():
-            self.assertEqual(d[k], v)                                  # check __getitem__ w/missing
-        for k, v in dict(a=1, b=2, c=30, d=77).items():
-            self.assertEqual(d.get(k, 77), v)                          # check get() w/ missing
-        for k, v in dict(a=True, b=True, c=True, d=False).items():
-            self.assertEqual(k in d, v)                                # check __contains__ w/missing
-        self.assertEqual(d.pop('a', 1001), 1, d)
-        self.assertEqual(d.pop('a', 1002), 1002)                       # check pop() w/missing
-        self.assertEqual(d.popitem(), ('b', 2))                        # check popitem() w/missing
-        with self.assertRaises(KeyError):
-            d.popitem()
-
-    def test_iter_not_calling_getitem_on_maps(self):
-        class DictWithGetItem(UserDict):
-            def __init__(self, *args, **kwds):
-                self.called = False
-                UserDict.__init__(self, *args, **kwds)
-            def __getitem__(self, item):
-                self.called = True
-                UserDict.__getitem__(self, item)
-
-        d = DictWithGetItem(a=1)
-        c = ChainMap(d)
-        d.called = False
-
-        set(c)  # iterate over chain map
-        self.assertFalse(d.called, '__getitem__ was called')
-
-    def test_dict_coercion(self):
-        d = ChainMap(dict(a=1, b=2), dict(b=20, c=30))
-        self.assertEqual(dict(d), dict(a=1, b=2, c=30))
-        self.assertEqual(dict(d.items()), dict(a=1, b=2, c=30))
-
-    def test_new_child(self):
-        'Tests for changes for issue #16613.'
-        c = ChainMap()
-        c['a'] = 1
-        c['b'] = 2
-        m = {'b':20, 'c': 30}
-        d = c.new_child(m)
-        self.assertEqual(d.maps, [{'b':20, 'c':30}, {'a':1, 'b':2}])  # check internal state
-        self.assertIs(m, d.maps[0])
-
-        # Use a different map than a dict
-        class lowerdict(dict):
-            def __getitem__(self, key):
-                if isinstance(key, str):
-                    key = key.lower()
-                return dict.__getitem__(self, key)
-            def __contains__(self, key):
-                if isinstance(key, str):
-                    key = key.lower()
-                return dict.__contains__(self, key)
-
-        c = ChainMap()
-        c['a'] = 1
-        c['b'] = 2
-        m = lowerdict(b=20, c=30)
-        d = c.new_child(m)
-        self.assertIs(m, d.maps[0])
-        for key in 'abc':                                             # check contains
-            self.assertIn(key, d)
-        for k, v in dict(a=1, B=20, C=30, z=100).items():             # check get
-            self.assertEqual(d.get(k, 100), v)
-
-        c = ChainMap({'a': 1, 'b': 2})
-        d = c.new_child(b=20, c=30)
-        self.assertEqual(d.maps, [{'b': 20, 'c': 30}, {'a': 1, 'b': 2}])

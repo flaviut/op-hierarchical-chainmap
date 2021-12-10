@@ -1,5 +1,6 @@
 import timeit
 from op_hierarchical_chainmap import ChainMap as CChainmap, HierarchicalChainMap as CHierarchicalChainMap
+
 from collections import ChainMap as PChainMap
 default_settings = {
     "serial": {
