@@ -140,6 +140,29 @@ struct CppHierarchicalChainMap : public CppChainMap {
 };
 
 
+static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
+    py::list wrappedMappings{};
+    const auto &maps = chain.cast<CppChainMap>().maps;
+    for (const auto &mapping: maps) {
+        if (mapping.contains(key) && !mapping[key].is_none()) {
+            wrappedMappings.attr("push")(mapping[key]);
+        } else {
+            wrappedMappings.attr("push")(py::dict());
+        }
+    }
+    return py::cast(CppHierarchicalChainMap(wrappedMappings));
+}
+
+static py::handle getNext(const py::str &key, const py::handle &node, bool onlyLocal = false) {
+    if (py::isinstance<py::dict>(node)) {
+        return node[key];
+    } else if (onlyLocal && !node.cast<CppChainMap>().maps[0].contains(key)) {
+        throw py::key_error(key);
+    } else {
+        return hierarchyForKey(key, node);
+    }
+}
+
 PYBIND11_MODULE(op_hierarchical_chainmap, m) {
     py::class_<CppChainMap>(m, "ChainMap")
             .def(py::init<>())
@@ -163,8 +186,8 @@ PYBIND11_MODULE(op_hierarchical_chainmap, m) {
             .def("__delitem__", &CppChainMap::_delitem)
             .def("__contains__", &CppChainMap::_contains)
             .def("__len__", &CppChainMap::_len)
-            // don't need weak references here because we copy all the data &
-            // create the iterators from a temporary object
+                    // don't need weak references here because we copy all the data &
+                    // create the iterators from a temporary object
             .def("__iter__", &CppChainMap::_iter)
             .def("items", &CppChainMap::items)
             .def("keys", &CppChainMap::keys)
@@ -179,29 +202,9 @@ PYBIND11_MODULE(op_hierarchical_chainmap, m) {
             .def(py::init<const py::args &>())
             .def("deep_dict", &CppHierarchicalChainMap::deepDict, py::arg("root") = py::none());
 
-}
+    m.def("get_next", &getNext, py::arg("key"), py::arg("node"), py::arg("only_local") = false);
+    m.def("hierarchy_for_key", &hierarchyForKey);
 
-static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
-    py::list wrappedMappings{};
-    const auto &maps = chain.cast<CppChainMap>().maps;
-    for (const auto &mapping: maps) {
-        if (mapping.contains(key) && !mapping[key].is_none()) {
-            wrappedMappings.attr("push")(mapping[key]);
-        } else {
-            wrappedMappings.attr("push")(py::dict());
-        }
-    }
-    return py::cast(CppHierarchicalChainMap(wrappedMappings));
-}
-
-static py::handle getNext(const py::str &key, const py::handle &node, bool onlyLocal = false) {
-    if (py::isinstance<py::dict>(node)) {
-        return node[key];
-    } else if (onlyLocal && !node.cast<CppChainMap>().maps[0].contains(key)) {
-        throw py::key_error(key);
-    } else {
-        return hierarchyForKey(key, node);
-    }
 }
 
 py::dict CppHierarchicalChainMap::deepDict(const py::handle &root) {
