@@ -11,7 +11,5 @@ def test_deep_dict():
 def test_realistic_get():
     cm = HierarchicalChainMap(*example_chain)
     pcm = PyHierarchicalChainMap(*example_chain)
-    print(pcm.get_by_path(["accessControl"], merged=True))
-    print(cm.get_by_path(["accessControl"], merged=True))
-    assert cm.get_by_path(["webcam", "timelapse"], merged=True) == {
-        "type": "off", "options": {}, "postRoll": 0, "fps": 25}
+    assert pcm.get_by_path(["accessControl"], merged=True) == \
+           cm.get_by_path(["accessControl"], merged=True)
