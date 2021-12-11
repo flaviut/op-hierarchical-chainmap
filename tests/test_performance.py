@@ -1,13 +1,11 @@
 import timeit
 
-import pytest
 from octoprint_settings import PyHierarchicalChainMap, example_chain
 
 from op_hierarchical_chainmap import \
     HierarchicalChainMap as CppHierarchicalChainMap
 
 
-@pytest.mark.skip
 def test_performance_deepdict():
     def create_test(HierarchicalChainMap):
         cm = HierarchicalChainMap(*example_chain)
