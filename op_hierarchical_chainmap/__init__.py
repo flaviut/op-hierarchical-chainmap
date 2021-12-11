@@ -35,7 +35,7 @@ class HierarchicalChainMap:
         return self.base.maps
 
     def deep_dict(self):
-        return self.base.deep_dict()
+        return self.base.deep_dict(self.base)
 
     def __copy__(self):
         return self.base.__copy__()

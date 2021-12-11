@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <sstream>
+#include <variant>
 
 using namespace pybind11::literals;
 namespace py = pybind11;
@@ -96,8 +97,9 @@ struct CppChainMap {
   py::dict flattened() const {
     py::dict d{};
     for (size_t i = this->maps.size() - 1; i != SIZE_MAX; --i) {
-      const py::dict &mapping = this->maps[i];
-      d.attr("update")(mapping);
+      // pybind11 doesn't give us a .update, so drop down into native python
+      // to avoid the .attr() call
+      PyDict_Update(d.ptr(), this->maps[i].ptr());
     }
     return d;
   }
@@ -112,6 +114,13 @@ struct CppChainMap {
   py::iterator _iter() const { return py::iter(this->flattened()); }
 
   py::object items() const { return this->flattened().attr("items")(); }
+
+  // uses the direct PyDict_Items instead of going through a level of
+  // indirection with the python attribute dict
+  py::object fastItems() const {
+    return py::reinterpret_steal<py::object>(
+        PyDict_Items(this->flattened().ptr()));
+  }
 
   py::object keys() const { return this->flattened().attr("keys")(); }
 
@@ -130,27 +139,40 @@ struct CppHierarchicalChainMap : public CppChainMap {
   py::dict deepDict(const py::object &root);
 };
 
-static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
+inline static CppHierarchicalChainMap hierarchyForKey(const py::handle &key,
+                                                      const py::handle &chain) {
   py::list wrappedMappings{};
   const auto &maps = chain.cast<CppChainMap>().maps;
-  for (const auto &mapping : maps) {
+  for (const auto &h : maps) {
+    auto mapping = h.cast<py::dict>();
     if (mapping.contains(key) && !mapping[key].is_none()) {
-      wrappedMappings.attr("append")(mapping[key]);
+      wrappedMappings.append(mapping[key]);
     } else {
-      wrappedMappings.attr("append")(py::dict());
+      wrappedMappings.append(py::dict());
     }
   }
-  return py::cast(CppHierarchicalChainMap(wrappedMappings));
+  return CppHierarchicalChainMap(wrappedMappings);
 }
 
-static py::object getNext(const py::str &key, const py::handle &node,
-                          bool onlyLocal = false) {
+inline static std::variant<CppHierarchicalChainMap, py::object>
+getNextInternal(const py::handle &key, const py::handle &node,
+                bool onlyLocal = false) {
   if (py::isinstance<py::dict>(node)) {
     return node[key];
   } else if (onlyLocal && !node.cast<CppChainMap>().maps[0].contains(key)) {
-    throw py::key_error(key);
+    throw py::key_error(key.cast<py::str>());
   } else {
     return hierarchyForKey(key, node);
+  }
+}
+
+inline static py::object getNext(const py::handle &key, const py::handle &node,
+                                 bool onlyLocal = false) {
+  auto result = getNextInternal(key, node, onlyLocal);
+  if (std::holds_alternative<CppHierarchicalChainMap>(result)) {
+    return py::cast(std::get<CppHierarchicalChainMap>(result));
+  } else {
+    return std::get<py::object>(result);
   }
 }
 
@@ -200,23 +222,57 @@ PYBIND11_MODULE(_ext, m) {
   m.def("hierarchy_for_key", &hierarchyForKey);
 }
 
-py::dict CppHierarchicalChainMap::deepDict(const py::object &root) {
-  if (root.is_none()) {
-    return deepDict(py::cast(this));
-  }
+inline py::dict deepDictInner(const py::object &pyRoot);
+inline static py::dict deepDictInner(const CppHierarchicalChainMap &root) {
+  py::object pyRoot = py::cast(root);
 
   py::dict result{};
-  for (const auto &item : py::iter(root)) {
+  for (const auto &item : py::iter(root.items())) {
     static const auto int0 = py::int_(0);
     static const auto int1 = py::int_(1);
-    const py::str &key = item[int0].cast<py::str>();
+    const py::handle &key = item[int0];
     const py::handle &value = item[int1];
 
     if (py::isinstance<py::dict>(value)) {
-      result[key] = deepDict(getNext(key, root));
+      const auto &next = getNextInternal(key, pyRoot);
+      if (std::holds_alternative<CppHierarchicalChainMap>(next)) {
+        result[key] = deepDictInner(std::get<CppHierarchicalChainMap>(next));
+      } else {
+        result[key] = deepDictInner(std::get<py::object>(next));
+      }
     } else {
       result[key] = value;
     }
   }
   return result;
+}
+inline py::dict deepDictInner(const py::object &pyRoot) {
+  const auto &root = py::cast<CppHierarchicalChainMap>(pyRoot);
+
+  py::dict result{};
+  for (const auto &item : py::iter(root.fastItems())) {
+    static const auto int0 = py::int_(0);
+    static const auto int1 = py::int_(1);
+    const py::handle &key = item[int0];
+    const py::handle &value = item[int1];
+
+    if (py::isinstance<py::dict>(value)) {
+      const auto &next = getNextInternal(key, pyRoot);
+      if (std::holds_alternative<CppHierarchicalChainMap>(next)) {
+        result[key] = deepDictInner(std::get<CppHierarchicalChainMap>(next));
+      } else {
+        result[key] = deepDictInner(std::get<py::object>(next));
+      }
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+py::dict CppHierarchicalChainMap::deepDict(const py::object &_root) {
+  if (_root.is_none()) {
+    return deepDictInner(*this);
+  } else {
+    return deepDictInner(py::cast<CppHierarchicalChainMap>(_root));
+  }
 }
