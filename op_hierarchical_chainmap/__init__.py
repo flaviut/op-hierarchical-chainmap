@@ -16,6 +16,12 @@ from op_hierarchical_chainmap._ext import (HierarchicalChainMapBase, get_next,
                                            hierarchy_for_key)
 
 
+def _as_base(obj):
+    if isinstance(obj, HierarchicalChainMap):
+        return obj.base
+    return obj
+
+
 class HierarchicalChainMap:
     def __init__(self, *args):
         self.base = HierarchicalChainMapBase(*args)
@@ -95,7 +101,7 @@ class HierarchicalChainMap:
                 value = current[key]
                 if isinstance(value, dict):
                     current = get_next(
-                        key, current, only_local=only_local
+                        key, _as_base(current), only_local=only_local
                     )
                 else:
                     return False
@@ -114,7 +120,7 @@ class HierarchicalChainMap:
         for key in path[:-1]:
             value = current[key]
             if isinstance(value, dict):
-                current = get_next(key, current, only_local=only_local)
+                current = get_next(key, _as_base(current), only_local=only_local)
             else:
                 raise KeyError(key)
 
@@ -130,7 +136,7 @@ class HierarchicalChainMap:
                 current.maps[0][key] = {}
             if not isinstance(current[key], dict):
                 raise KeyError(key)
-            current = hierarchy_for_key(key, current)
+            current = hierarchy_for_key(key, _as_base(current))
 
         current[path[-1]] = value
 
@@ -143,6 +149,6 @@ class HierarchicalChainMap:
         for key in path[:-1]:
             if not isinstance(current[key], dict):
                 raise KeyError(key)
-            current = hierarchy_for_key(key, current)
+            current = hierarchy_for_key(key, _as_base(current))
 
         del current[path[-1]]
