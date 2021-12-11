@@ -135,9 +135,9 @@ static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
   const auto &maps = chain.cast<CppChainMap>().maps;
   for (const auto &mapping : maps) {
     if (mapping.contains(key) && !mapping[key].is_none()) {
-      wrappedMappings.attr("push")(mapping[key]);
+      wrappedMappings.attr("append")(mapping[key]);
     } else {
-      wrappedMappings.attr("push")(py::dict());
+      wrappedMappings.attr("append")(py::dict());
     }
   }
   return py::cast(CppHierarchicalChainMap(wrappedMappings));
