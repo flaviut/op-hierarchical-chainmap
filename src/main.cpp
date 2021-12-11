@@ -127,7 +127,7 @@ struct CppChainMap {
 struct CppHierarchicalChainMap : public CppChainMap {
   using CppChainMap::CppChainMap;
 
-  py::dict deepDict(const py::handle &root);
+  py::dict deepDict(const py::object &root);
 };
 
 static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
@@ -143,7 +143,7 @@ static py::object hierarchyForKey(const py::str &key, const py::handle &chain) {
   return py::cast(CppHierarchicalChainMap(wrappedMappings));
 }
 
-static py::handle getNext(const py::str &key, const py::handle &node,
+static py::object getNext(const py::str &key, const py::handle &node,
                           bool onlyLocal = false) {
   if (py::isinstance<py::dict>(node)) {
     return node[key];
@@ -200,7 +200,7 @@ PYBIND11_MODULE(_ext, m) {
   m.def("hierarchy_for_key", &hierarchyForKey);
 }
 
-py::dict CppHierarchicalChainMap::deepDict(const py::handle &root) {
+py::dict CppHierarchicalChainMap::deepDict(const py::object &root) {
   if (root.is_none()) {
     return deepDict(py::cast(this));
   }

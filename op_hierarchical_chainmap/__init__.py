@@ -92,7 +92,7 @@ class HierarchicalChainMap:
         if only_defaults:
             current = self.parents
         elif only_local:
-            current = self.__class__(self.maps[0])
+            current = HierarchicalChainMap(self.maps[0])
         else:
             current = self
 
@@ -113,7 +113,7 @@ class HierarchicalChainMap:
         if only_defaults:
             current = self.parents
         elif only_local:
-            current = self.__class__(self.maps[0])
+            current = HierarchicalChainMap(self.maps[0])
         else:
             current = self
 
