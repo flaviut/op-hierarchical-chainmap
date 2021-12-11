@@ -28,7 +28,7 @@ class HierarchicalChainMap:
 
     @property
     def parents(self):
-        return self.base.parents
+        return HierarchicalChainMap(*self.base.parents.maps)
 
     @property
     def maps(self):
