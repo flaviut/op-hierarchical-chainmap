@@ -1,3 +1,5 @@
+# not used in favor of an improved pure-python algorithm
+
 # op_hierarchical_chainmap
 
 A faster HierarchicalChainMap built for Octoprint with
